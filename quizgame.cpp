@@ -194,7 +194,7 @@ void initQuestions() {
     q.correctOption = 'B'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 17
-    q.questionText = "17) ¿Qué instrumento se utiliza para medir la presión atmosférica?";
+    q.questionText = "¿Qué instrumento se utiliza para medir la presión atmosférica?";
     q.optionA = "Termómetro"; q.optionB = "Higrómetro"; q.optionC = "Barómetro"; q.optionD = "Anemómetro";
     q.correctOption = 'C'; q.chaosReward = 1; questions.push_back(q);
 
