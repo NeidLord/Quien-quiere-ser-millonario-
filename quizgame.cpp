@@ -7,6 +7,7 @@
 #include <tchar.h>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm> // Necesario para std::shuffle
 
 // Define los colores específicos
 #define PURPLE_COLOR       RGB(140, 82, 255) // Morado (#8c52ff)
@@ -26,6 +27,7 @@
 #define IDC_50_50_BUTTON    1005 // Botón 50/50
 #define IDC_BUTTON_HINT     1008 // Botón Hint
 #define IDC_RETIRE_BUTTON   1009 // Botón de Retirarse
+#define IDC_RESTART_BUTTON  1010 // Nuevo botón para reiniciar
 
 // Declaración de handles y variables globales
 HWND hMainWindow;
@@ -45,6 +47,7 @@ HWND hTeamLabel;    // "TEAM MULTITECHNEW"
 HWND hStartButton;
 HWND hCreditsLabel; // Nombres de los integrantes
 HWND hEnjoyLabel;   // Etiqueta para "¡DISFRUTEN!"
+HWND hRestartButton; // Nuevo handle para el botón de reiniciar
 
 int currentQuestionIndex = 0;
 int correctAnswers = 0;
@@ -67,6 +70,7 @@ HFONT hFontTeamLabel = NULL;
 HFONT hFontCredits = NULL;
 HFONT hFontEnjoy = NULL;
 HFONT hFontHelpers = NULL; // Nueva fuente para los botones de ayuda
+HFONT hFontRestartButton = NULL; // Nueva fuente para el botón de reiniciar
 
 // Estructura para almacenar preguntas, opciones y respuesta correcta
 struct Question {
@@ -81,6 +85,8 @@ struct Question {
 
 // Vector de preguntas
 std::vector<Question> questions;
+// Vector para mantener el orden aleatorio de las preguntas
+std::vector<int> questionOrder;
 
 // Prototipos de las funciones
 std::string intToString(int num);
@@ -90,11 +96,13 @@ void Use5050();
 void UseHint();
 void ShowRetireResult(); // Nueva función para mostrar resultado al retirarse
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
-void ShowResult();
+void ShowResult(bool won); // Modificada para indicar si se ganó o se perdió
 void UpdateChaosDisplay();
 void ShowGameControls();
 void HideStartScreen();
 void ShowStartScreen();
+void ResetGameState();
+void HideGameControls(); // Nueva función para reiniciar el estado del juego
 
 // Función auxiliar para convertir un entero a string
 std::string intToString(int num) {
@@ -204,6 +212,13 @@ void initQuestions() {
     q.questionText = "20)¿Cuál es la capital de Australia?";
     q.optionA = "Sídney"; q.optionB = "Melbourne"; q.optionC = "Canberra"; q.optionD = "Brisbane";
     q.correctOption = 'C'; q.chaosReward = 1; questions.push_back(q);
+
+    // Inicializar el vector de orden de preguntas
+    for (int i = 0; i < questions.size(); ++i) {
+        questionOrder.push_back(i);
+    }
+    // Barajar las preguntas
+    std::random_shuffle(questionOrder.begin(), questionOrder.end());
 }
 
 // Función de entrada principal
@@ -226,6 +241,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     hFontCredits = CreateFont(26, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("Arial"));
     hFontEnjoy = CreateFont(50, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("Arial"));
     hFontHelpers = CreateFont(20, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("Arial"));
+    hFontRestartButton = CreateFont(50, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("Arial")); // Fuente más grande para el botón de reiniciar
 
 
     // Configuración de la clase de ventana
@@ -267,6 +283,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     if (hFontCredits) DeleteObject(hFontCredits);
     if (hFontEnjoy) DeleteObject(hFontEnjoy);
     if (hFontHelpers) DeleteObject(hFontHelpers);
+    if (hFontRestartButton) DeleteObject(hFontRestartButton); // Liberar la nueva fuente
 
     return 0;
 }
@@ -309,16 +326,17 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
             hStartButton = CreateWindow(TEXT("Button"), TEXT("INICIAR"), WS_CHILD, 475, 400, 250, 80, hWnd, (HMENU)IDC_START_BUTTON, NULL, NULL);
             SendMessage(hStartButton, WM_SETFONT, (WPARAM)hFontQuestion, TRUE);
 
-            // Nombres en la esquina inferior derecha
-            std::string creditsText = "Sebastian Gallardo\nSneider Quintero\nManuel Perez\nLuiber Alvarado\nJosue Martinez\nPedro Sequera\nJose Fuentes";
-            hCreditsLabel = CreateWindow(TEXT("Static"), creditsText.c_str(), WS_CHILD | SS_RIGHT, 970, 650, 200, 190, hWnd, (HMENU)IDC_CREDITS_LABEL, NULL, NULL);
-            SendMessage(hCreditsLabel, WM_SETFONT, (WPARAM)hFontCredits, TRUE);
-
             // Etiqueta "¡DISFRUTEN!"
             hEnjoyLabel = CreateWindow(TEXT("Static"), TEXT("¡DISFRUTEN!"), WS_CHILD | SS_CENTER, 0, 700, 1200, 60, hWnd, (HMENU)IDC_ENJOY_LABEL, NULL, NULL);
             SendMessage(hEnjoyLabel, WM_SETFONT, (WPARAM)hFontEnjoy, TRUE);
 
-            HideStartScreen();
+            // Botón de Reiniciar (inicialmente oculto y más grande/centrado)
+            // Ancho: 400, Alto: 100. Centrado: (1200 - 400) / 2 = 400. Posición Y: 400 (justo debajo de TEAM MULTITECHNEW)
+            hRestartButton = CreateWindow(TEXT("Button"), TEXT("¿DESEA REINICIAR?"), WS_CHILD, 300, 500, 600, 150, hWnd, (HMENU)IDC_RESTART_BUTTON, NULL, NULL);
+            SendMessage(hRestartButton, WM_SETFONT, (WPARAM)hFontRestartButton, TRUE);
+            ShowWindow(hRestartButton, SW_HIDE);
+
+            HideGameControls(); // Ocultar controles del juego al inicio
             ShowStartScreen();
             
             break; 
@@ -377,7 +395,13 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                 HideStartScreen();
                 ShowGameControls();
                 LoadNextQuestion(hWnd);
-            } else if (LOWORD(wp) == IDC_50_50_BUTTON) {
+            } else if (LOWORD(wp) == IDC_RESTART_BUTTON) {
+                ResetGameState();
+                HideGameControls(); // Ocultar los controles del juego
+                ShowStartScreen(); // Mostrar la pantalla de inicio (con "TEAM MULTITECHNEW")
+                ShowWindow(hRestartButton, SW_HIDE); // Ocultar el botón de reiniciar
+            }
+            else if (LOWORD(wp) == IDC_50_50_BUTTON) {
                 if (!fiftyFiftyUsed) {
                     Use5050();
                     fiftyFiftyUsed = true;
@@ -395,43 +419,52 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                 ShowRetireResult();
             }
             else if (LOWORD(wp) >= 1 && LOWORD(wp) <= 4) {
-                if (currentQuestionIndex > 0 && currentQuestionIndex <= questions.size()) {
+                // Verifica si aún hay preguntas por mostrar
+                if (currentQuestionIndex < questionOrder.size()) { 
                     char selectedOption = ' ';
                     if (LOWORD(wp) == 1) { selectedOption = 'A'; }
                     else if (LOWORD(wp) == 2) { selectedOption = 'B'; }
                     else if (LOWORD(wp) == 3) { selectedOption = 'C'; }
                     else if (LOWORD(wp) == 4) { selectedOption = 'D'; }
 
-                    if (selectedOption != questions[currentQuestionIndex - 1].correctOption) {
+                    // Usa el índice del vector de orden barajado para obtener la pregunta correcta
+                    int actualQuestionIndex = questionOrder[currentQuestionIndex];
+                    
+                    if (selectedOption != questions[actualQuestionIndex].correctOption) {
                         std::string msg = "Juego terminado. Respuesta incorrecta. Chaos acumulado: " + intToString(totalChaos) + ".";
                         MessageBox(hMainWindow, msg.c_str(), "Fin del Juego", MB_ICONERROR | MB_OK);
-                        DestroyWindow(hMainWindow);
-                        break;
+                        
+                        // Oculta todos los controles del juego y muestra el botón de reiniciar
+                        HideGameControls();
+                        ShowWindow(hRestartButton, SW_SHOW);
+                        EnableWindow(hRestartButton, TRUE);
+                        
+                        break; 
                     } else {
                         correctAnswers++;
-                        int chaosGained = questions[currentQuestionIndex - 1].chaosReward;
-                        // El multiplicador 2X se ha eliminado.
+                        int chaosGained = questions[actualQuestionIndex].chaosReward;
                         totalChaos += chaosGained;
                         
-                        ShowWindow(hQuestionLabel, SW_HIDE);
-                        ShowWindow(hOptionA, SW_HIDE);
-                        ShowWindow(hOptionB, SW_HIDE);
-                        ShowWindow(hOptionC, SW_HIDE);
-                        ShowWindow(hOptionD, SW_HIDE);
-                        ShowWindow(hChaosLabel, SW_HIDE);
-                        ShowWindow(h5050Button, SW_HIDE);
-                        ShowWindow(hHintButton, SW_HIDE);
-                        ShowWindow(hRetireButton, SW_HIDE);
-
+                        // Oculta temporalmente los controles del juego para la transición
+                        HideGameControls(); // Oculta todos los controles para la transición
+                        
+                        // Restablece el color de fondo de los botones a azul antes de la siguiente pregunta
                         SetClassLongPtr(hOptionA, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
                         SetClassLongPtr(hOptionB, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
                         SetClassLongPtr(hOptionC, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
                         SetClassLongPtr(hOptionD, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
+                        InvalidateRect(hOptionA, NULL, TRUE);
+                        InvalidateRect(hOptionB, NULL, TRUE);
+                        InvalidateRect(hOptionC, NULL, TRUE);
+                        InvalidateRect(hOptionD, NULL, TRUE);
 
-                        Sleep(500); 
+                        Sleep(500); // Pequeña pausa para el efecto visual
                         
+                        currentQuestionIndex++; // Incrementa el índice solo si la respuesta fue correcta
                         LoadNextQuestion(hWnd);
                     }
+                } else {
+                    ShowResult(true); 
                 }
             }
             break;
@@ -452,50 +485,36 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 
 // Carga la siguiente pregunta o muestra el resultado final
 void LoadNextQuestion(HWND hWnd) {
-    if (currentQuestionIndex < questions.size()) {
-        EnableWindow(hOptionA, TRUE); ShowWindow(hOptionA, SW_SHOW);
-        EnableWindow(hOptionB, TRUE); ShowWindow(hOptionB, SW_SHOW);
-        EnableWindow(hOptionC, TRUE); ShowWindow(hOptionC, SW_SHOW);
-        EnableWindow(hOptionD, TRUE); ShowWindow(hOptionD, SW_SHOW);
-        ShowWindow(hQuestionLabel, SW_SHOW);
-        UpdateChaosDisplay(); 
+    if (currentQuestionIndex < questionOrder.size()) {
+        ShowGameControls(); // Asegúrate de que los controles del juego sean visibles
         
-        // Vuelve a mostrar y habilitar los botones de ayuda si no se han usado
-        if (!fiftyFiftyUsed) { ShowWindow(h5050Button, SW_SHOW); EnableWindow(h5050Button, TRUE); }
-        else { ShowWindow(h5050Button, SW_HIDE); EnableWindow(h5050Button, FALSE); }
+        // Obtiene el índice real de la pregunta del vector barajado
+        int actualQuestionIndex = questionOrder[currentQuestionIndex];
         
-        if (!hintUsed) { ShowWindow(hHintButton, SW_SHOW); EnableWindow(hHintButton, TRUE); }
-        else { ShowWindow(hHintButton, SW_HIDE); EnableWindow(hHintButton, FALSE); }
-
-        ShowWindow(hRetireButton, SW_SHOW);
-        EnableWindow(hRetireButton, TRUE);
-
-
-        SetWindowTextA(hQuestionLabel, questions[currentQuestionIndex].questionText.c_str());
-        SetWindowTextA(hOptionA, ("A) " + questions[currentQuestionIndex].optionA).c_str());
-        SetWindowTextA(hOptionB, ("B) " + questions[currentQuestionIndex].optionB).c_str());
-        SetWindowTextA(hOptionC, ("C) " + questions[currentQuestionIndex].optionC).c_str());
-        SetWindowTextA(hOptionD, ("D) " + questions[currentQuestionIndex].optionD).c_str());
+        SetWindowTextA(hQuestionLabel, questions[actualQuestionIndex].questionText.c_str());
+        SetWindowTextA(hOptionA, ("A) " + questions[actualQuestionIndex].optionA).c_str());
+        SetWindowTextA(hOptionB, ("B) " + questions[actualQuestionIndex].optionB).c_str());
+        SetWindowTextA(hOptionC, ("C) " + questions[actualQuestionIndex].optionC).c_str());
+        SetWindowTextA(hOptionD, ("D) " + questions[actualQuestionIndex].optionD).c_str());
         
-        currentQuestionIndex++;
     } else {
-        ShowResult();
+        ShowResult(true);
     }
 }
 
 // Función para usar la ayuda 50/50
 void Use5050() {
-    if (currentQuestionIndex > 0) {
-        Question currentQ = questions[currentQuestionIndex - 1];
-        char correctOption = currentQ.correctOption;
-        
-        std::vector<HWND> incorrectButtons;
-        if (correctOption != 'A') incorrectButtons.push_back(hOptionA);
-        if (correctOption != 'B') incorrectButtons.push_back(hOptionB);
-        if (correctOption != 'C') incorrectButtons.push_back(hOptionC);
-        if (correctOption != 'D') incorrectButtons.push_back(hOptionD);
-        
-        // Seleccionar dos botones incorrectos al azar para ocultar
+    int actualQuestionIndex = questionOrder[currentQuestionIndex];
+    Question currentQ = questions[actualQuestionIndex];
+    char correctOption = currentQ.correctOption;
+    
+    std::vector<HWND> incorrectButtons;
+    if (correctOption != 'A') incorrectButtons.push_back(hOptionA);
+    if (correctOption != 'B') incorrectButtons.push_back(hOptionB);
+    if (correctOption != 'C') incorrectButtons.push_back(hOptionC);
+    if (correctOption != 'D') incorrectButtons.push_back(hOptionD);
+    
+    if (incorrectButtons.size() >= 2) {
         int randomIndex1 = rand() % incorrectButtons.size();
         HWND buttonToHide1 = incorrectButtons[randomIndex1];
         incorrectButtons.erase(incorrectButtons.begin() + randomIndex1);
@@ -505,36 +524,56 @@ void Use5050() {
 
         ShowWindow(buttonToHide1, SW_HIDE);
         ShowWindow(buttonToHide2, SW_HIDE);
+    } else if (incorrectButtons.size() == 1) { 
+        HWND buttonToHide1 = incorrectButtons[0];
+        ShowWindow(buttonToHide1, SW_HIDE);
+
+        std::vector<HWND> correctButtons;
+        if (correctOption == 'A') correctButtons.push_back(hOptionA);
+        if (correctOption == 'B') correctButtons.push_back(hOptionB);
+        if (correctOption == 'C') correctButtons.push_back(hOptionC);
+        if (correctOption == 'D') correctButtons.push_back(hOptionD);
+
+        if (!correctButtons.empty()) {
+            // Encuentra el botón correcto que no fue ocultado por la opción incorrecta si hay 2
+            // Oculta uno de los correctos si solo hay una opción incorrecta
+            ShowWindow(correctButtons[0], SW_HIDE);
+        }
     }
 }
 
 // Función para usar la ayuda Hint
 void UseHint() {
-    if (currentQuestionIndex > 0) {
-        Question currentQ = questions[currentQuestionIndex - 1];
-        char correctOption = currentQ.correctOption;
-        std::string hint = "Una de las opciones incorrectas es: ";
+    int actualQuestionIndex = questionOrder[currentQuestionIndex];
+    Question currentQ = questions[actualQuestionIndex];
+    char correctOption = currentQ.correctOption;
+    std::string hint = "Una de las opciones incorrectas es: ";
 
-        std::vector<char> incorrectOptions;
-        if (correctOption != 'A') incorrectOptions.push_back('A');
-        if (correctOption != 'B') incorrectOptions.push_back('B');
-        if (correctOption != 'C') incorrectOptions.push_back('C');
-        if (correctOption != 'D') incorrectOptions.push_back('D');
+    std::vector<char> incorrectOptions;
+    if (correctOption != 'A') incorrectOptions.push_back('A');
+    if (correctOption != 'B') incorrectOptions.push_back('B');
+    if (correctOption != 'C') incorrectOptions.push_back('C');
+    if (correctOption != 'D') incorrectOptions.push_back('D');
 
+    if (!incorrectOptions.empty()) {
         int randomIndex = rand() % incorrectOptions.size();
         hint += incorrectOptions[randomIndex];
         MessageBox(hMainWindow, hint.c_str(), "Ayuda Hint", MB_ICONINFORMATION | MB_OK);
+    } else {
+        MessageBox(hMainWindow, "No hay opciones incorrectas para mostrar como pista.", "Ayuda Hint", MB_ICONINFORMATION | MB_OK);
     }
 }
 
 // Función para retirarse y mostrar el resultado
 void ShowRetireResult() {
     std::string message = "Has decidido retirarte.\n";
-    // Se resta 1 a currentQuestionIndex porque ya se incrementó al cargar la pregunta
-    message += "Has respondido correctamente " + intToString(correctAnswers) + " de " + intToString(currentQuestionIndex - 1) + " preguntas.\n";
+    message += "Has respondido correctamente " + intToString(correctAnswers) + " de " + intToString(currentQuestionIndex) + " preguntas.\n";
     message += "Chaos acumulado: " + intToString(totalChaos) + ".";
     MessageBox(hMainWindow, message.c_str(), "Juego terminado", MB_OK);
-    DestroyWindow(hMainWindow);
+    
+    HideGameControls();
+    ShowWindow(hRestartButton, SW_SHOW);
+    EnableWindow(hRestartButton, TRUE);
 }
 
 // Oculta los controles de la pantalla de inicio
@@ -546,6 +585,20 @@ void HideStartScreen() {
     ShowWindow(hEnjoyLabel, SW_HIDE);
 }
 
+// Oculta los controles del juego principal
+void HideGameControls() {
+    ShowWindow(hQuestionLabel, SW_HIDE);
+    ShowWindow(hOptionA, SW_HIDE);
+    ShowWindow(hOptionB, SW_HIDE);
+    ShowWindow(hOptionC, SW_HIDE);
+    ShowWindow(hOptionD, SW_HIDE);
+    ShowWindow(hChaosLabel, SW_HIDE);
+    ShowWindow(h5050Button, SW_HIDE);
+    ShowWindow(hHintButton, SW_HIDE);
+    ShowWindow(hRetireButton, SW_HIDE);
+}
+
+
 // Muestra los controles del juego principal
 void ShowGameControls() {
     ShowWindow(hQuestionLabel, SW_SHOW);
@@ -554,6 +607,8 @@ void ShowGameControls() {
     ShowWindow(hOptionC, SW_SHOW);
     ShowWindow(hOptionD, SW_SHOW);
     UpdateChaosDisplay();
+    ShowWindow(hChaosLabel, SW_SHOW);
+
     if (!fiftyFiftyUsed) {
         ShowWindow(h5050Button, SW_SHOW);
         EnableWindow(h5050Button, TRUE);
@@ -562,53 +617,88 @@ void ShowGameControls() {
         EnableWindow(h5050Button, FALSE);
     }
     
-    // El botón 2X ha sido eliminado.
-    ShowWindow(hHintButton, SW_SHOW);
     if (!hintUsed) {
+        ShowWindow(hHintButton, SW_SHOW);
         EnableWindow(hHintButton, TRUE);
     } else {
+        ShowWindow(hHintButton, SW_HIDE);
         EnableWindow(hHintButton, FALSE);
     }
 
     ShowWindow(hRetireButton, SW_SHOW);
     EnableWindow(hRetireButton, TRUE);
+
+    ShowWindow(hRestartButton, SW_HIDE); // Asegurarse de que el botón de reiniciar esté oculto durante el juego
 }
 
 // Actualiza el texto del contador de Chaos
 void UpdateChaosDisplay() {
-    ShowWindow(hChaosLabel, SW_SHOW);
     std::string chaosText = "Chaos: " + intToString(totalChaos);
     SetWindowTextA(hChaosLabel, chaosText.c_str());
 }
 
 // Muestra el resultado final del juego
-void ShowResult() {
+void ShowResult(bool won) {
     std::stringstream ss;
-    if (correctAnswers >= 15) {
-        ss << "¡Felicidades! Has respondido todo correctamente.\n";
-        ss << "Has respondido correctamente " << correctAnswers << " de " << totalQuestions << " preguntas.\n";
+    if (won && correctAnswers == questions.size()) { // Asegurarse de que realmente respondió todas correctamente
+        ss << "¡Felicidades! ¡Has ganado!\n";
+        ss << "Has respondido correctamente " << correctAnswers << " de " << questions.size() << " preguntas.\n";
         ss << "Chaos acumulado: " << totalChaos << ".";
     } else {
-        ss << "Has perdido :C.\n";
-        ss << "Necesitas al menos 15 respuestas correctas para ganar.\n";
-        ss << "Has respondido correctamente " << correctAnswers << " de " << totalQuestions << " preguntas.\n";
+        ss << "Has perdido :C.\n"; // Si no ganó, es porque falló o no llegó al mínimo
+        ss << "Necesitas responder todas las preguntas correctamente para ganar.\n";
+        ss << "Has respondido correctamente " << correctAnswers << " de " << currentQuestionIndex << " preguntas.\n";
         ss << "Chaos acumulado: " << totalChaos << ".";
     }
     std::string message = ss.str();
     MessageBox(hMainWindow, message.c_str(), "Fin del Juego", MB_OK);
-    DestroyWindow(hMainWindow);
+
+    HideGameControls();
+    ShowWindow(hRestartButton, SW_SHOW);
+    EnableWindow(hRestartButton, TRUE);
 }
 
+// Nueva función para reiniciar el estado del juego
+void ResetGameState() {
+    currentQuestionIndex = 0;
+    correctAnswers = 0;
+    totalChaos = 0;
+    fiftyFiftyUsed = false;
+    hintUsed = false;
+
+    // Volver a barajar las preguntas para un nuevo orden
+    std::random_shuffle(questionOrder.begin(), questionOrder.end());
+
+    // Restablecer el color de fondo de los botones a azul
+    SetClassLongPtr(hOptionA, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
+    SetClassLongPtr(hOptionB, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
+    SetClassLongPtr(hOptionC, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
+    SetClassLongPtr(hOptionD, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
+    InvalidateRect(hOptionA, NULL, TRUE);
+    InvalidateRect(hOptionB, NULL, TRUE);
+    InvalidateRect(hOptionC, NULL, TRUE);
+    InvalidateRect(hOptionD, NULL, TRUE);
+}
 
 // Función para inicializar y mostrar los controles de la pantalla de inicio
 void ShowStartScreen() {
     ShowWindow(hProjectLabel, SW_SHOW);
     ShowWindow(hTeamLabel, SW_SHOW);
     ShowWindow(hStartButton, SW_SHOW);
-    ShowWindow(hCreditsLabel, SW_SHOW);
+    ShowWindow(hCreditsLabel, SW_SHOW); // Asegurarse de que los créditos estén visibles
     ShowWindow(hEnjoyLabel, SW_SHOW);
+    
+    // Ocultar todos los controles que no pertenecen a la pantalla de inicio
     ShowWindow(hChaosLabel, SW_HIDE);
     ShowWindow(h5050Button, SW_HIDE);
     ShowWindow(hHintButton, SW_HIDE);
     ShowWindow(hRetireButton, SW_HIDE);
+    ShowWindow(hRestartButton, SW_HIDE); // El botón de reiniciar debe estar oculto en la pantalla de inicio
+    
+    // Si tienes controles específicos para el juego (hQuestionLabel, hOptionA-D), también ocultarlos
+    ShowWindow(hQuestionLabel, SW_HIDE);
+    ShowWindow(hOptionA, SW_HIDE);
+    ShowWindow(hOptionB, SW_HIDE);
+    ShowWindow(hOptionC, SW_HIDE);
+    ShowWindow(hOptionD, SW_HIDE);
 }
