@@ -10,24 +10,24 @@
 #include <algorithm> // Necesario para std::shuffle
 
 // Define los colores específicos
-#define PURPLE_COLOR       RGB(140, 82, 255) // Morado (#8c52ff)
-#define BLUE_COLOR         RGB(0, 0, 255)   // Azul puro
-#define LIME_GREEN         RGB(0, 255, 0)   // Verde brillante para la respuesta correcta
+#define PURPLE_COLOR        RGB(140, 82, 255) // Morado (#8c52ff)
+#define BLUE_COLOR          RGB(0, 0, 255)    // Azul puro
+#define LIME_GREEN          RGB(0, 255, 0)    // Verde brillante para la respuesta correcta
 
 // Colores para el gradiente de fondo
 #define GRADIENT_START_COLOR PURPLE_COLOR
-#define GRADIENT_END_COLOR   RGB(0, 0, 128)  // Un azul más oscuro para el final del gradiente
+#define GRADIENT_END_COLOR   RGB(0, 0, 128)    // Un azul más oscuro para el final del gradiente
 
 // Identificadores para los controles
-#define IDC_START_BUTTON    1000
-#define IDC_PROJECT_LABEL   1001 // "PROYECTO REALIZADO POR"
-#define IDC_TEAM_LABEL      1002 // "TEAM MULTITECHNEW"
-#define IDC_CREDITS_LABEL   1003 // Nombres de los integrantes
-#define IDC_ENJOY_LABEL     1004 // "¡DISFRUTEN!"
-#define IDC_50_50_BUTTON    1005 // Botón 50/50
-#define IDC_BUTTON_HINT     1008 // Botón Hint
-#define IDC_RETIRE_BUTTON   1009 // Botón de Retirarse
-#define IDC_RESTART_BUTTON  1010 // Nuevo botón para reiniciar
+#define IDC_START_BUTTON     1000
+#define IDC_PROJECT_LABEL    1001 // "PROYECTO REALIZADO POR"
+#define IDC_TEAM_LABEL       1002 // "TEAM MULTITECHNEW"
+#define IDC_CREDITS_LABEL    1003 // Nombres de los integrantes
+#define IDC_ENJOY_LABEL      1004 // "¡DISFRUTEN!"
+#define IDC_50_50_BUTTON     1005 // Botón 50/50
+#define IDC_BUTTON_HINT      1008 // Botón Hint
+#define IDC_RETIRE_BUTTON    1009 // Botón de Retirarse
+#define IDC_RESTART_BUTTON   1010 // Nuevo botón para reiniciar
 
 // Declaración de handles y variables globales
 HWND hMainWindow;
@@ -43,10 +43,10 @@ HWND hRetireButton; // Botón de Retirarse
 
 // Controles de la pantalla de inicio
 HWND hProjectLabel; // "PROYECTO REALIZADO POR"
-HWND hTeamLabel;    // "TEAM MULTITECHNEW"
+HWND hTeamLabel;     // "TEAM MULTITECHNEW"
 HWND hStartButton;
 HWND hCreditsLabel; // Nombres de los integrantes
-HWND hEnjoyLabel;   // Etiqueta para "¡DISFRUTEN!"
+HWND hEnjoyLabel;     // Etiqueta para "¡DISFRUTEN!"
 HWND hRestartButton; // Nuevo handle para el botón de reiniciar
 
 int currentQuestionIndex = 0;
@@ -114,82 +114,82 @@ std::string intToString(int num) {
 void initQuestions() {
     Question q;
     // Pregunta 1
-    q.questionText = "1) ¿Cuál es la extensión de archivo estándar para un programa en C++?";
+    q.questionText = "¿Cuál es la extensión de archivo estándar para un programa en C++?";
     q.optionA = ".cp"; q.optionB = ".cxxp"; q.optionC = ".exe"; q.optionD = ".cpp";
     q.correctOption = 'D'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 2
-    q.questionText = "2) ¿Qué palabra clave se utiliza para declarar una variable constante en C++?";
+    q.questionText = "¿Qué palabra clave se utiliza para declarar una variable constante en C++?";
     q.optionA = "define"; q.optionB = "constant"; q.optionC = "static"; q.optionD = "const";
     q.correctOption = 'D'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 3
-    q.questionText = "3) ¿Qué símbolo se utiliza para terminar una instrucción en C++?";
+    q.questionText = "¿Qué símbolo se utiliza para terminar una instrucción en C++?";
     q.optionA = ","; q.optionB = "."; q.optionC = ":"; q.optionD = ";";
     q.correctOption = 'D'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 4
-    q.questionText = "4) ¿Qué se usa para imprimir en la consola en C++?";
+    q.questionText = "¿Qué se usa para imprimir en la consola en C++?";
     q.optionA = "cout"; q.optionB = "echo"; q.optionC = "print"; q.optionD = "display";
     q.correctOption = 'A'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 5
-    q.questionText = "5) ¿Qué biblioteca se debe incluir para usar cout?";
+    q.questionText = "¿Qué biblioteca se debe incluir para usar cout?";
     q.optionA = "#include <stdio.h>"; q.optionB = "#include <string>"; q.optionC = " #include <iostream>"; q.optionD = "#include <conio.h>";
     q.correctOption = 'C'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 6
-    q.questionText = "6) ¿Cuál es el tipo de dato para números enteros en C++?";
+    q.questionText = "¿Cuál es el tipo de dato para números enteros en C++?";
     q.optionA = "float"; q.optionB = "char"; q.optionC = "int"; q.optionD = "bool Ángel";
     q.correctOption = 'C'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 7
-    q.questionText = "7)¿Qué palabra clave se usa para definir una función en C++?";
+    q.questionText = "¿Qué palabra clave se usa para definir una función en C++?";
     q.optionA = "procedure"; q.optionB = "void"; q.optionC = "define"; q.optionD = "func";
     q.correctOption = 'B'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 8
-    q.questionText = "8) ¿Cuál es el operador de comparación de igualdad en C++?";
+    q.questionText = "¿Cuál es el operador de comparación de igualdad en C++?";
     q.optionA = "!="; q.optionB = "=="; q.optionC = "="; q.optionD = "===";
     q.correctOption = 'B'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 9
-    q.questionText = "9) ¿Qué tipo de dato se usa para almacenar texto en C++?";
+    q.questionText = "¿Qué tipo de dato se usa para almacenar texto en C++?";
     q.optionA = "string"; q.optionB = "text"; q.optionC = "word"; q.optionD = "char";
     q.correctOption = 'A'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 10
-    q.questionText = "10) ¿Qué estructura se usa para repetir instrucciones en C++?";
+    q.questionText = "¿Qué estructura se usa para repetir instrucciones en C++?";
     q.optionA = "repeat"; q.optionB = "iterate"; q.optionC = "for"; q.optionD = "loop";
     q.correctOption = 'C'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 11
-    q.questionText = "11)¿Qué elemento químico tiene el símbolo 'O'?";
+    q.questionText = "¿Qué elemento químico tiene el símbolo 'O'?";
     q.optionA = "Oro"; q.optionB = "Oxígeno"; q.optionC = "Plata"; q.optionD = "Osmio";
     q.correctOption = 'B'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 12
-    q.questionText = "12) ¿Quién fue el primer presidente de los Estados Unidos?";
+    q.questionText = "¿Quién fue el primer presidente de los Estados Unidos?";
     q.optionA = "Thomas Jefferson"; q.optionB = "Abraham Lincoln"; q.optionC = "George Washington"; q.optionD = "John Adams";
     q.correctOption = 'C'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 13
-    q.questionText = "13) ¿Cuanto es 77 + 33?";
+    q.questionText = "¿Cuanto es 77 + 33?";
     q.optionA = "110"; q.optionB = "100"; q.optionC = "108"; q.optionD = "105";
     q.correctOption = 'A'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 14
-    q.questionText = "14) ¿Cuál es el valor de x si 2x - 5 = 15?";
+    q.questionText = "¿Cuál es el valor de x si 2x - 5 = 15?";
     q.optionA = "8"; q.optionB = "9"; q.optionC = "10"; q.optionD = "11";
     q.correctOption = 'C'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 15
-    q.questionText = "15) ¿Cuál es el valor de x si 3x + 7 = 19?";
+    q.questionText = "¿Cuál es el valor de x si 3x + 7 = 19?";
     q.optionA = "3"; q.optionB = "4"; q.optionC = "5"; q.optionD = "6";
     q.correctOption = 'B'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 16
-    q.questionText = "16) ¿Quién inventó la bombilla?";
+    q.questionText = "¿Quién inventó la bombilla?";
     q.optionA = "Nikola Tesla"; q.optionB = "Thomas Edison"; q.optionC = "Alexander Graham Bell"; q.optionD = "Benjamin Franklin";
     q.correctOption = 'B'; q.chaosReward = 1; questions.push_back(q);
 
@@ -199,17 +199,17 @@ void initQuestions() {
     q.correctOption = 'C'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 18
-    q.questionText = "18) ¿La costumbre jurídica es:?";
+    q.questionText = "¿La costumbre jurídica es:?";
     q.optionA = "Una conducta contraria al derecho."; q.optionB = "Una relación jurídica.."; q.optionC = "Una ley especial."; q.optionD = "Una fuente próxima del derecho.";
     q.correctOption = 'D'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 19
-    q.questionText = "19) ¿Una de las características de la normal jurídica es la: ?";
+    q.questionText = "¿Una de las características de la normal jurídica es la: ?";
     q.optionA = "Generalidad."; q.optionB = "Autonomía."; q.optionC = "Unilateralidad."; q.optionD = "Interioridad";
     q.correctOption = 'A'; q.chaosReward = 1; questions.push_back(q);
 
     // Pregunta 20
-    q.questionText = "20)¿Cuál es la capital de Australia?";
+    q.questionText = "¿Cuál es la capital de Australia?";
     q.optionA = "Sídney"; q.optionB = "Melbourne"; q.optionC = "Canberra"; q.optionD = "Brisbane";
     q.correctOption = 'C'; q.chaosReward = 1; questions.push_back(q);
 
@@ -231,7 +231,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     // Creación de los pinceles
     hBrushCorrect = CreateSolidBrush(LIME_GREEN);
     hBrushBlue = CreateSolidBrush(BLUE_COLOR);
-    
+
     // Creación de las fuentes
     hFontQuestion = CreateFont(40, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("Arial"));
     hFontOption = CreateFont(20, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("Arial"));
@@ -245,7 +245,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
 
     // Configuración de la clase de ventana
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1); 
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hInstance = hInst;
     wc.lpszClassName = TEXT("myWindowClass");
@@ -258,7 +258,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
     // Creación de la ventana principal con nuevas dimensiones
     hMainWindow = CreateWindow(TEXT("myWindowClass"), TEXT("Quiz Game"), WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_SIZEBOX | WS_MAXIMIZEBOX | WS_MINIMIZEBOX,
-                               CW_USEDEFAULT, CW_USEDEFAULT, 1200, 900, NULL, NULL, hInst, NULL);
+                                CW_USEDEFAULT, CW_USEDEFAULT, 1200, 900, NULL, NULL, hInst, NULL);
 
     if (!hMainWindow) {
         MessageBox(NULL, TEXT("Error al crear la ventana principal."), TEXT("Error"), MB_ICONERROR | MB_OK);
@@ -322,7 +322,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 
             hTeamLabel = CreateWindow(TEXT("Static"), TEXT("TEAM MULTITECHNEW"), WS_CHILD | SS_CENTER, 0, 250, 1200, 80, hWnd, (HMENU)IDC_TEAM_LABEL, NULL, NULL);
             SendMessage(hTeamLabel, WM_SETFONT, (WPARAM)hFontTeamLabel, TRUE);
-            
+
             hStartButton = CreateWindow(TEXT("Button"), TEXT("INICIAR"), WS_CHILD, 475, 400, 250, 80, hWnd, (HMENU)IDC_START_BUTTON, NULL, NULL);
             SendMessage(hStartButton, WM_SETFONT, (WPARAM)hFontQuestion, TRUE);
 
@@ -338,11 +338,11 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 
             HideGameControls(); // Ocultar controles del juego al inicio
             ShowStartScreen();
-            
-            break; 
+
+            break;
         }
         case WM_ERASEBKGND:
-            return 1; 
+            return 1;
         case WM_PAINT: {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
@@ -420,7 +420,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
             }
             else if (LOWORD(wp) >= 1 && LOWORD(wp) <= 4) {
                 // Verifica si aún hay preguntas por mostrar
-                if (currentQuestionIndex < questionOrder.size()) { 
+                if (currentQuestionIndex < questionOrder.size()) {
                     char selectedOption = ' ';
                     if (LOWORD(wp) == 1) { selectedOption = 'A'; }
                     else if (LOWORD(wp) == 2) { selectedOption = 'B'; }
@@ -429,25 +429,36 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 
                     // Usa el índice del vector de orden barajado para obtener la pregunta correcta
                     int actualQuestionIndex = questionOrder[currentQuestionIndex];
-                    
+
                     if (selectedOption != questions[actualQuestionIndex].correctOption) {
-                        std::string msg = "Juego terminado. Respuesta incorrecta. Chaos acumulado: " + intToString(totalChaos) + ".";
-                        MessageBox(hMainWindow, msg.c_str(), "Fin del Juego", MB_ICONERROR | MB_OK);
-                        
+                        // *** MODIFICACIÓN PRINCIPAL ***
+                        // Al perder, en lugar de un mensaje genérico, muestra la pregunta incorrecta y su respuesta correcta.
+                        std::string message = "Pregunta incorrecta: " + questions[actualQuestionIndex].questionText + "\n";
+                        message += "La respuesta correcta era: ";
+                        switch (questions[actualQuestionIndex].correctOption) {
+                            case 'A': message += questions[actualQuestionIndex].optionA; break;
+                            case 'B': message += questions[actualQuestionIndex].optionB; break;
+                            case 'C': message += questions[actualQuestionIndex].optionC; break;
+                            case 'D': message += questions[actualQuestionIndex].optionD; break;
+                        }
+                        message += "\n\n";
+                        message += "Juego terminado. Chaos acumulado: " + intToString(totalChaos) + ".";
+                        MessageBox(hMainWindow, message.c_str(), "Fin del Juego", MB_ICONERROR | MB_OK);
+
                         // Oculta todos los controles del juego y muestra el botón de reiniciar
                         HideGameControls();
                         ShowWindow(hRestartButton, SW_SHOW);
                         EnableWindow(hRestartButton, TRUE);
-                        
-                        break; 
+
+                        break;
                     } else {
                         correctAnswers++;
                         int chaosGained = questions[actualQuestionIndex].chaosReward;
                         totalChaos += chaosGained;
-                        
+
                         // Oculta temporalmente los controles del juego para la transición
                         HideGameControls(); // Oculta todos los controles para la transición
-                        
+
                         // Restablece el color de fondo de los botones a azul antes de la siguiente pregunta
                         SetClassLongPtr(hOptionA, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
                         SetClassLongPtr(hOptionB, GCLP_HBRBACKGROUND, (LONG_PTR)hBrushBlue);
@@ -459,12 +470,12 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                         InvalidateRect(hOptionD, NULL, TRUE);
 
                         Sleep(500); // Pequeña pausa para el efecto visual
-                        
+
                         currentQuestionIndex++; // Incrementa el índice solo si la respuesta fue correcta
                         LoadNextQuestion(hWnd);
                     }
                 } else {
-                    ShowResult(true); 
+                    ShowResult(true);
                 }
             }
             break;
@@ -487,16 +498,16 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 void LoadNextQuestion(HWND hWnd) {
     if (currentQuestionIndex < questionOrder.size()) {
         ShowGameControls(); // Asegúrate de que los controles del juego sean visibles
-        
+
         // Obtiene el índice real de la pregunta del vector barajado
         int actualQuestionIndex = questionOrder[currentQuestionIndex];
-        
+
         SetWindowTextA(hQuestionLabel, questions[actualQuestionIndex].questionText.c_str());
         SetWindowTextA(hOptionA, ("A) " + questions[actualQuestionIndex].optionA).c_str());
         SetWindowTextA(hOptionB, ("B) " + questions[actualQuestionIndex].optionB).c_str());
         SetWindowTextA(hOptionC, ("C) " + questions[actualQuestionIndex].optionC).c_str());
         SetWindowTextA(hOptionD, ("D) " + questions[actualQuestionIndex].optionD).c_str());
-        
+
     } else {
         ShowResult(true);
     }
@@ -507,24 +518,24 @@ void Use5050() {
     int actualQuestionIndex = questionOrder[currentQuestionIndex];
     Question currentQ = questions[actualQuestionIndex];
     char correctOption = currentQ.correctOption;
-    
+
     std::vector<HWND> incorrectButtons;
     if (correctOption != 'A') incorrectButtons.push_back(hOptionA);
     if (correctOption != 'B') incorrectButtons.push_back(hOptionB);
     if (correctOption != 'C') incorrectButtons.push_back(hOptionC);
     if (correctOption != 'D') incorrectButtons.push_back(hOptionD);
-    
+
     if (incorrectButtons.size() >= 2) {
         int randomIndex1 = rand() % incorrectButtons.size();
         HWND buttonToHide1 = incorrectButtons[randomIndex1];
         incorrectButtons.erase(incorrectButtons.begin() + randomIndex1);
-        
+
         int randomIndex2 = rand() % incorrectButtons.size();
         HWND buttonToHide2 = incorrectButtons[randomIndex2];
 
         ShowWindow(buttonToHide1, SW_HIDE);
         ShowWindow(buttonToHide2, SW_HIDE);
-    } else if (incorrectButtons.size() == 1) { 
+    } else if (incorrectButtons.size() == 1) {
         HWND buttonToHide1 = incorrectButtons[0];
         ShowWindow(buttonToHide1, SW_HIDE);
 
@@ -570,7 +581,7 @@ void ShowRetireResult() {
     message += "Has respondido correctamente " + intToString(correctAnswers) + " de " + intToString(currentQuestionIndex) + " preguntas.\n";
     message += "Chaos acumulado: " + intToString(totalChaos) + ".";
     MessageBox(hMainWindow, message.c_str(), "Juego terminado", MB_OK);
-    
+
     HideGameControls();
     ShowWindow(hRestartButton, SW_SHOW);
     EnableWindow(hRestartButton, TRUE);
@@ -616,7 +627,7 @@ void ShowGameControls() {
         ShowWindow(h5050Button, SW_HIDE);
         EnableWindow(h5050Button, FALSE);
     }
-    
+
     if (!hintUsed) {
         ShowWindow(hHintButton, SW_SHOW);
         EnableWindow(hHintButton, TRUE);
@@ -687,18 +698,11 @@ void ShowStartScreen() {
     ShowWindow(hStartButton, SW_SHOW);
     ShowWindow(hCreditsLabel, SW_SHOW); // Asegurarse de que los créditos estén visibles
     ShowWindow(hEnjoyLabel, SW_SHOW);
-    
+
     // Ocultar todos los controles que no pertenecen a la pantalla de inicio
     ShowWindow(hChaosLabel, SW_HIDE);
     ShowWindow(h5050Button, SW_HIDE);
     ShowWindow(hHintButton, SW_HIDE);
     ShowWindow(hRetireButton, SW_HIDE);
-    ShowWindow(hRestartButton, SW_HIDE); // El botón de reiniciar debe estar oculto en la pantalla de inicio
-    
-    // Si tienes controles específicos para el juego (hQuestionLabel, hOptionA-D), también ocultarlos
-    ShowWindow(hQuestionLabel, SW_HIDE);
-    ShowWindow(hOptionA, SW_HIDE);
-    ShowWindow(hOptionB, SW_HIDE);
-    ShowWindow(hOptionC, SW_HIDE);
-    ShowWindow(hOptionD, SW_HIDE);
+    ShowWindow(hRestartButton, SW_HIDE);
 }
